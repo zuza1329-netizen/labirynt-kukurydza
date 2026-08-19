@@ -1,23 +1,729 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Labirynt Kukurydziany 🌽</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Labirynt Kukurydzy – Gra Dzienna</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    padding: 20px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-family: Arial, sans-serif;
+
+    background:
+        linear-gradient(rgba(20, 45, 20, 0.88), rgba(20, 45, 20, 0.88)),
+        #315b32;
+
+    color: white;
+}
+
+.game {
+    width: 100%;
+    max-width: 600px;
+
+    background: #263f27;
+
+    border-radius: 25px;
+
+    padding: 25px;
+
+    text-align: center;
+
+    box-shadow: 0 10px 40px rgba(0,0,0,0.45);
+}
+
+.logo {
+    font-size: 35px;
+    margin-bottom: 5px;
+}
+
+.title {
+    font-size: 25px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.progress {
+    font-size: 15px;
+    opacity: 0.8;
+    margin-bottom: 20px;
+}
+
+.question {
+    font-size: 22px;
+    font-weight: bold;
+    line-height: 1.4;
+
+    margin-bottom: 25px;
+}
+
+.answers {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.answer {
+    width: 100%;
+
+    border: none;
+    border-radius: 15px;
+
+    padding: 17px;
+
+    font-size: 17px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    background: #f4ead0;
+    color: #1d2b1e;
+
+    transition: 0.2s;
+}
+
+.answer:hover {
+    transform: scale(1.02);
+}
+
+.text-answer {
+    width: 100%;
+
+    padding: 16px;
+
+    border: none;
+    border-radius: 15px;
+
+    font-size: 18px;
+
+    text-align: center;
+
+    margin-bottom: 12px;
+}
+
+.check-button {
+    width: 100%;
+
+    padding: 16px;
+
+    border: none;
+    border-radius: 15px;
+
+    font-size: 17px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    background: #f4ead0;
+    color: #1d2b1e;
+}
+
+.message {
+    margin-top: 20px;
+
+    padding: 18px;
+
+    border-radius: 15px;
+
+    font-size: 19px;
+    font-weight: bold;
+}
+
+.correct {
+    background: #2e7d32;
+}
+
+.wrong {
+    background: #a83232;
+}
+
+.info {
+    margin-top: 18px;
+
+    font-size: 16px;
+
+    line-height: 1.5;
+}
+
+.score {
+    margin-top: 20px;
+
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.finish {
+    font-size: 25px;
+    font-weight: bold;
+
+    margin-bottom: 20px;
+}
+
+.reset-button {
+    margin-top: 25px;
+
+    padding: 13px 20px;
+
+    border: none;
+    border-radius: 12px;
+
+    cursor: pointer;
+
+    font-weight: bold;
+}
+</style>
 </head>
 
 <body>
 
-    <h1>🌽 Labirynt Kukurydziany 🌽</h1>
+<div class="game">
 
-    <p>Witaj w naszym labiryncie!</p>
+    <div class="logo">🌽🎃🌽</div>
 
-    <p>
-        Znajdź punkty rozmieszczone w labiryncie
-        i zeskanuj znajdujące się tam kody QR.
-    </p>
+    <div class="title">
+        LABIRYNT KUKURYDZY
+    </div>
 
-    <button>Rozpocznij zabawę</button>
+    <div id="game"></div>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   PYTANIA
+===================================================== */
+
+const questions = {
+
+    1: {
+        question:
+        "Ile ziaren kukurydzy może znajdować się w jednej kolbie kukurydzy?",
+
+        type: "choice",
+
+        answers: [
+            "A) jedno",
+            "B) setki",
+            "C) kilkadziesiąt",
+            "D) kilka"
+        ],
+
+        correct: "B"
+    },
+
+
+    2: {
+        question:
+        "Ma pomarańczową skórę, rośnie na polu i kojarzy się z Halloween. Co to?",
+
+        type: "text",
+
+        correct: "dynia"
+    },
+
+
+    3: {
+        question:
+        "Co potrzebuje roślina, żeby rosnąć?",
+
+        type: "choice",
+
+        answers: [
+            "A) wody i światła",
+            "B) czekolady",
+            "C) tylko deszczu",
+            "D) piasku i lodu"
+        ],
+
+        correct: "A"
+    },
+
+
+    4: {
+        question:
+        "Co się znajduje w środku dyni?",
+
+        type: "text",
+
+        correct: "pestki"
+    },
+
+
+    5: {
+        question:
+        "Jakie zwierzę jest przy wejściu do labiryntu?",
+
+        type: "text",
+
+        correct: "sarna"
+    },
+
+
+    6: {
+        question:
+        "Co powstaje po podgrzaniu kukurydzy?",
+
+        type: "choice",
+
+        answers: [
+            "A) popcorn",
+            "B) cukierki",
+            "C) chipsy",
+            "D) makaron"
+        ],
+
+        correct: "A"
+    },
+
+
+    7: {
+        question:
+        "Jaki kolor ma wstążka przy punkcie numer 3?",
+
+        type: "text",
+
+        correct: "czarna"
+    }
+
+};
+
+
+/* =====================================================
+   POBIERANIE NUMERU PYTANIA Z QR
+===================================================== */
+
+const params = new URLSearchParams(window.location.search);
+
+const questionNumber = Number(params.get("q"));
+
+const game = document.getElementById("game");
+
+
+/* =====================================================
+   ZAPIS ZALICZONYCH PYTAŃ
+===================================================== */
+
+let completed =
+    JSON.parse(localStorage.getItem("dayCompleted")) || [];
+
+
+/* =====================================================
+   JEŚLI NIE MA NUMERU PYTANIA
+===================================================== */
+
+if (!questions[questionNumber]) {
+
+    showStart();
+
+} else {
+
+    showQuestion(questionNumber);
+
+}
+
+
+/* =====================================================
+   EKRAN STARTOWY
+===================================================== */
+
+function showStart() {
+
+    game.innerHTML = `
+
+        <div class="question">
+            🌽 WITAJ W LABIRYNCIE! 🌽
+        </div>
+
+        <div class="info">
+
+            Znajdź kod QR w labiryncie
+            i zeskanuj go, aby rozpocząć pytanie.
+
+            <br><br>
+
+            Każde pytanie możesz znaleźć
+            w dowolnej kolejności.
+
+        </div>
+
+        <div class="score">
+
+            ZALICZONE:
+            ${completed.length} / 7
+
+        </div>
+
+    `;
+}
+
+
+/* =====================================================
+   POKAZANIE PYTANIA
+===================================================== */
+
+function showQuestion(number) {
+
+    const q = questions[number];
+
+
+    /* Czy pytanie zostało już zaliczone? */
+
+    if (completed.includes(number)) {
+
+        game.innerHTML = `
+
+            <div class="message correct">
+
+                ✅ PYTANIE JUŻ ZALICZONE!
+
+            </div>
+
+            <div class="info">
+
+                To pytanie zostało już przez Ciebie
+                rozwiązane poprawnie.
+
+                <br><br>
+
+                Możesz szukać kolejnego kodu QR
+                w dowolnym miejscu labiryntu.
+
+            </div>
+
+            <div class="score">
+
+                ZALICZONE:
+                ${completed.length} / 7
+
+            </div>
+
+        `;
+
+        return;
+    }
+
+
+    let html = `
+
+        <div class="progress">
+
+            PYTANIE ${number} / 7
+
+        </div>
+
+        <div class="question">
+
+            ${q.question}
+
+        </div>
+
+    `;
+
+
+    /* =================================================
+       PYTANIE ABCD
+    ================================================= */
+
+    if (q.type === "choice") {
+
+        html += <div class="answers">;
+
+        q.answers.forEach((answer, index) => {
+
+            const letter =
+                ["A", "B", "C", "D"][index];
+
+            html += `
+
+                <button
+                    class="answer"
+                    onclick="
+                    checkChoice(
+                        '${letter}',
+                        '${q.correct}',
+                        ${number}
+                    )">
+
+                    ${answer}
+
+                </button>
+
+            `;
+
+        });
+
+        html += </div>;
+    }
+
+
+    /* =================================================
+       PYTANIE Z WPISYWANIEM
+    ================================================= */
+
+    if (q.type === "text") {
+
+        html += `
+
+            <input
+                id="textAnswer"
+                class="text-answer"
+                type="text"
+                placeholder="Wpisz odpowiedź"
+                autocomplete="off"
+            >
+
+            <button
+                class="check-button"
+                onclick="checkText(${number})">
+
+                SPRAWDŹ ODPOWIEDŹ
+
+            </button>
+
+        `;
+    }
+
+
+    html += `
+
+        <div class="score">
+
+            ZALICZONE:
+            ${completed.length} / 7
+
+        </div>
+
+    `;
+
+
+    game.innerHTML = html;
+}
+
+
+/* =====================================================
+   SPRAWDZANIE ABCD
+===================================================== */
+
+function checkChoice(answer, correct, number) {
+
+    if (answer === correct) {
+
+        correctAnswer(number);
+
+    } else {
+
+        showWrong();
+
+    }
+
+}
+
+
+/* =====================================================
+   SPRAWDZANIE ODPOWIEDZI TEKSTOWEJ
+===================================================== */
+
+function checkText(number) {
+
+    const input =
+        document.getElementById("textAnswer");
+
+
+    let answer =
+        input.value
+        .trim()
+        .toLowerCase();
+
+
+    let correct =
+        questions[number].correct
+        .trim()
+        .toLowerCase();
+
+
+    if (answer === correct) {
+
+        correctAnswer(number);
+
+    } else {
+
+        showWrong();
+
+    }
+
+}
+
+
+/* =====================================================
+   ZŁA ODPOWIEDŹ
+===================================================== */
+
+function showWrong() {
+
+    const old =
+        document.getElementById("message");
+
+    if (old) {
+        old.remove();
+    }
+
+
+    game.insertAdjacentHTML(
+
+        "beforeend",
+
+        `
+
+        <div
+            id="message"
+            class="message wrong">
+
+            ❌ ZŁA ODPOWIEDŹ!
+
+            <div class="info">
+
+                Spróbuj jeszcze raz.
+
+            </div>
+
+        </div>
+
+        `
+
+    );
+
+}
+
+
+/* =====================================================
+   DOBRA ODPOWIEDŹ
+===================================================== */
+
+function correctAnswer(number) {
+
+
+    /* Dodajemy pytanie tylko raz */
+
+    if (!completed.includes(number)) {
+
+        completed.push(number);
+
+        localStorage.setItem(
+            "dayCompleted",
+            JSON.stringify(completed)
+        );
+
+    }
+
+
+    /* Sprawdzamy, czy wszystkie pytania
+       zostały już zaliczone */
+
+    if (completed.length === 7) {
+
+        showFinish();
+
+        return;
+
+    }
+
+
+    /* Pytanie zaliczone */
+
+    game.innerHTML = `
+
+        <div class="message correct">
+
+            ✅ DOBRA ODPOWIEDŹ!
+
+        </div>
+
+        <div class="info">
+
+            🎉 Brawo! Pytanie zostało zaliczone.
+
+            <br><br>
+
+            Teraz szukaj kolejnych kodów QR
+            w labiryncie.
+
+            <br><br>
+
+            Możesz znaleźć je
+            w dowolnej kolejności.
+
+        </div>
+
+        <div class="score">
+
+            ZALICZONE:
+            ${completed.length} / 7
+
+        </div>
+
+    `;
+
+}
+
+
+/* =====================================================
+   KONIEC GRY
+===================================================== */
+
+function showFinish() {
+
+    game.innerHTML = `
+
+        <div class="finish">
+
+            🏆 GRATULACJE! 🏆
+
+        </div>
+
+        <div class="message correct">
+
+            🌽 UKOŃCZYŁEŚ GRĘ! 🌽
+
+            <div class="info">
+
+                Odpowiedziałeś poprawnie
+                na wszystkie pytania.
+
+                <br><br>
+
+                Twój wynik:
+
+                <br><br>
+
+                <strong style="font-size:30px;">
+
+                    7 / 7
+
+                </strong>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+</script>
 
 </body>
 </html>
